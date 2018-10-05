@@ -25,8 +25,10 @@ public class player31 implements ContestSubmission {
     private int population_size_ = 10; // size of one population
 
     // PARAMETERS FOR PARENT SELECTION
-    private int tournament_size_ = 6;
+    private int tournament_size_ = 3;
 
+    //PARAMETERS FOR MUTATION
+    private double mutation_prop = 0.05;
 
     public player31() {
         rnd_ = new Random();
@@ -118,6 +120,15 @@ public class player31 implements ContestSubmission {
         System.out.println("--------------------------------");
     }
 
+    private void printIndividual(Individual in){
+      double values[] = in.getValues();
+      for(int i=0; i<values.length; i++){
+        String s = Double.toString(values[i]);
+        System.out.print(s.substring(0,5).concat("\t"));
+      }
+      System.out.println("\n------------------------------------------------------------------------------\n");
+    }
+
     private ArrayList<Individual> tournamentSelection(ArrayList<Individual> pool){
       /*
       Select two parents from pool of Individuals based on tournament selection.
@@ -145,7 +156,7 @@ public class player31 implements ContestSubmission {
       @param parents: Should be of size two, we use the first two individuals in the list
       as parents.
 
-      @returns: ArrayList<Individual> of size two, containing two children of
+      @returns: ArrayList<Individual> of size two, containing two children
       */
 
       double a = 0.5; // parameter, mentioned in book p.67
@@ -171,6 +182,55 @@ public class player31 implements ContestSubmission {
       return children;
     }
 
+    private ArrayList<Individual> onePointCrossover(ArrayList<Individual> parents){
+      /*
+      Crossover two floatingpoint parents with One Point Crossover.
+
+      @param parents: Should be of size two, we use the first two individuals in the list
+      as parents.
+
+      @returns: ArrayList<Individual> of size two, containing two children
+      */
+      double p0[] = parents.get(0).getValues();
+      double p1[] = parents.get(1).getValues();
+      // Initialize children value arrays
+      double c0[] = new double[individual_size_];
+      double c1[] = new double[individual_size_];
+
+      // choose random point for crossover
+      int crossoverpoint = rnd_.nextInt(individual_size_);
+
+      ArrayList<Individual> children  = new ArrayList<Individual>(2);
+      for(int i=0; i<individual_size_; i++){
+        if (i<crossoverpoint){
+          c0[i] = p0[i];
+          c1[i] = p1[i];
+        } else{
+          c0[i] = p1[i];
+          c1[i] = p0[i];
+        }
+      }
+
+      children.add(new Individual(c0));
+      children.add(new Individual(c1));
+      return children;
+    }
+
+    private void uniformMutation(ArrayList<Individual>  individuals){
+      /*
+      Performs uniform mutation on each of the individuals.
+
+      */
+      for(Individual i : individuals){
+        double values[] = i.getValues();
+        for(int j=0; j<values.length; j++){
+          if (rnd_.nextDouble()<mutation_prop){ // p = mutation_prop that this happens
+            double random_double = values_min_ + (values_max_ - values_min_) * rnd_.nextDouble();
+            values[j] = (double) random_double;
+          }
+        }
+      }
+    }
 
     public void run() {
         // Run your algorithm here
@@ -181,38 +241,51 @@ public class player31 implements ContestSubmission {
         // Rank population in fitness
         Collections.sort(population);
 
-        printPopulationFitness(population); // just for testing
+        //printPopulationFitness(population); // just for testing
 
         while (evaluations_counter_ < evaluations_limit_) {
+
 
             // Create next generation (offspring)
             ArrayList<Individual> offspring = new ArrayList<Individual>(population_size_);
             while (offspring.size() < population_size_){
 
-              // Select 2 Parents (parents has size 2)
+              // PARENT SELECTION (parents has size 2)
               ArrayList<Individual> parents = tournamentSelection(population);
 
-              // Recombine Parents to receive 2 children (fitness not evaluated)
+              // RECOMBINE Parents to receive 2 children (fitness not evaluated)
+              // (1) One Point Crossover
+              // ArrayList<Individual> children = onePointCrossover(parents);
+
+              // (2) Blend Crossover
               ArrayList<Individual> children = blendCrossover(parents);
 
-              // TODO: Mutate children
-              children = children;
+              // MUTATE children
+              // (1) Uniform mutation
+              uniformMutation(children);
 
               // Evaluate final children's fitness
               for (Individual child: children){
                 child.setFitness(((double) evaluation_.evaluate(child.getValues())));
                 evaluations_counter_ += 1;
               }
-              // add children to offspring
+              // Add children to offspring
               offspring.addAll(children);
             }
+            
 
-          // TODO: SELECT individuals for next generation
-          // aka. Survivor Selection
+          // SURVIVOR SELECTION
+          // (1) Just replace whole population by offspring
+          //  population = new ArrayList<Individual>(offspring);
+
+          // (2) Rank population+offspring and select population_size_ best.
+          population.addAll(offspring);
+          Collections.sort(population);
+          population =  new ArrayList<Individual>(population.subList(0,population_size_));
+
 
         }
-
-    }
+      }
 }
 
 
@@ -247,6 +320,10 @@ class Individual implements Comparable<Individual> {
 
     public void setFitness(double fitness){
         fitness_  = fitness;
+    }
+
+    public void setValues(double values[]){
+        values_ = values;
     }
 
     @Override
