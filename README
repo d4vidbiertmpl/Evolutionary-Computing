@@ -1,0 +1,6 @@
+To compile, make sure to change your player31.java and MainClass.txt.
+Then run:
+- jar cmf MainClass.txt submission.jar Individual.class
+and then the typical:
+- javac -cp contest.jar player31.java
+- java -jar testrun.jar -submission=player31  -evaluation=BentCigarFunction -seed=1
