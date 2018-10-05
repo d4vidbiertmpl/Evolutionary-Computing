@@ -6,27 +6,53 @@ import java.util.*;
 import java.util.Comparator;
 
 public class player31 implements ContestSubmission {
+
+    // individuals are always 10-dim vectors
+    private static final int individual_size_ = 10;
+    // all single values of the individuals are in [-5,5]
+    private static final double values_min_ = -5.0;
+    private static final double values_max_ = 5.0;
+
+    // object for creating random numbers
     Random rnd_;
+
+    // object for evaluating created individuals
     ContestEvaluation evaluation_;
-    private int evaluations_limit_;
+
+    private int evaluations_limit_;   // number of allowed evaluations (defined by framework)
+    private int evaluations_counter_ = 0 ; // counter for performed evaluations, starts at 0
+
+    private int population_size_ = 10; // size of one population
+
+    // PARAMETERS FOR PARENT SELECTION
+    private int tournament_size_ = 6;
+
 
     public player31() {
         rnd_ = new Random();
     }
 
     public void setSeed(long seed) {
-        // Set seed of algortihms random process
+        // Set seed of algortihm's random process
         rnd_.setSeed(seed);
     }
 
     public void setEvaluation(ContestEvaluation evaluation) {
-        // Set evaluation problem used in the run
+        /**
+        Set evaluation function used in the run.
+        */
         evaluation_ = evaluation;
 
         // Get evaluation properties
         Properties props = evaluation.getProperties();
-        // Get evaluation limit
+
+        // Get evaluation limit (Different for different evaluation functions)
+        // Katsuura:   1.000.000
+        // Schaffers:    100.000
+        // BentCigar:     10.000
+        // Sphere:        10.000
         evaluations_limit_ = Integer.parseInt(props.getProperty("Evaluations"));
+
         // Property keys depend on specific evaluation
         // E.g. double param = Double.parseDouble(props.getProperty("property_name"));
         boolean isMultimodal = Boolean.parseBoolean(props.getProperty("Multimodal"));
@@ -34,147 +60,197 @@ public class player31 implements ContestSubmission {
         boolean isSeparable = Boolean.parseBoolean(props.getProperty("Separable"));
 
         // Do sth with property values, e.g. specify relevant settings of your algorithm
+
+        // TODO: Following, we can adjust our algorithm to different evaluation functions.
         if (isMultimodal) {
-            // Do sth
+          // Multimodal ->  KatsuuraEvaluation
+
+        } else if (hasStructure) {
+          // Regular ->   SchaffersEvaluation
+
+        } else if (isSeparable) {
+          // Seperable -> SphereEvaluation  (aka. Dummy-Evaluation/ Hillclimber)
+
         } else {
-            // Do sth else
+          // None -> BentCigarFunction
+
         }
     }
 
-    // Initialization => Population => Parent selection => Parents
-    // => Recombination (Crossover) => Mutation => Offspring
-    // => Survivor Selection => Population
+    private ArrayList<Individual> initialize_population() {
+        /**
+        Creates a random new population of individuals. The population is
+        represented by a 2-dim array with doubles (size [population_size_][individual_size_]).
+        The single values are from [-5,5].
 
-    // Pseudo-code
-    // Initialize Population with random candidate solutions
-    // Evaluate each candidate
-    // REPEAT UNTIL T_COND is met
-    //  SELECT Parents
-    //  RECOMBINE Parents
-    //  MUTATE Offspring
-    // EVALUATE new candidates
-    // SELECT individuals for next generation
+        @return: double [population_size_][individual_size_]
+        */
+        ArrayList<Individual> population = new ArrayList<Individual>(population_size_);
 
-
-    private double[][] initialize_population(int population_size) {
-
-        Random r = new Random();
-        double r_min = -5.0;
-        double r_max = 5.0;
-
-        double[][] population = new double[population_size][10];
-
-        for (int i = 0; i < population_size; i++) {
-            double[] individual = new double[10];
+        for (int i = 0; i < population_size_; i++) {
+            double[] individual = new double[individual_size_];
             for (int j = 0; j < 10; j++) {
-                double random_double = r_min + (r_max - r_min) * r.nextDouble();
+                double random_double = values_min_ + (values_max_ - values_min_) * rnd_.nextDouble();
                 individual[j] = random_double;
             }
-            population[i] = individual;
-
+            //evaluate generated individual
+            double fitness_i = (double) evaluation_.evaluate(individual);
+            evaluations_counter_ += 1;
+            // add individual to population
+            population.add(new Individual(individual, fitness_i));
         }
         return population;
     }
 
-    public double[][] evaluate_population(double[][] population, int population_size, ContestEvaluation evaluation_) {
+    private void printPopulationFitness(ArrayList<Individual> population) {
+      /*
+      Prints the fitnesses of the current population.
 
-        double[][] fitness = new double[population_size][2];
-
-        for (int i = 0; i < population_size; i++) {
-            double[] current_individual = population[i];
-            double current_fitness = (double) evaluation_.evaluate(current_individual);
-            fitness[i][0] = current_fitness;
-            fitness[i][1] = i;
-        }
-        return fitness;
-    }
-
-
-    private double getmaxValue(double array[]) {
-        double max = Arrays.stream(array).max().getAsDouble();
-        return max;
-    }
-
-
-    private void displayArray(double[][] fitness) {
+      @param population: ArrayList<Individual> of all individuals
+                         whose fitness we want to print.
+      */
         System.out.println("--------------------------------");
-        System.out.println("Fitness\t\t Index");
-        for (int i = 0; i < fitness.length; i++) {
-            double[] itemRecord = fitness[i];
-            System.out.println(itemRecord[0]);
-            System.out.println(itemRecord[1]);
+        System.out.println("Fitness: ");
+        for (Individual individual : population){
+          double x = individual.getFitness();
+          System.out.println(x);
         }
         System.out.println("--------------------------------");
     }
 
-    //        for (int i = 0; i < 10; i++) {
-//            System.out.print(Double.toString(population[1][i]).concat(" "));
-//        }
+    private ArrayList<Individual> tournamentSelection(ArrayList<Individual> pool){
+      /*
+      Select two parents from pool of Individuals based on tournament selection.
+
+      @param pool: ArrayList<Individual> of all individuals we can choose from
+      @return: ArrayList<Individual> with two selected parents
+      */
+      ArrayList<Individual> mating_pool = new ArrayList<Individual>(tournament_size_);
+
+      // Select tournament_size_ individuals from pool.
+      while(mating_pool.size()<tournament_size_){
+        Individual i = pool.get(rnd_.nextInt(pool.size()));
+        mating_pool.add(i);
+      }
+
+      // return the two fittest
+      Collections.sort(mating_pool);
+      return new ArrayList<Individual>(mating_pool.subList(0,2));
+    }
+
+    private ArrayList<Individual> blendCrossover(ArrayList<Individual> parents){
+      /*
+      Crossover two floatingpoint parents with Blend Crossover.
+
+      @param parents: Should be of size two, we use the first two individuals in the list
+      as parents.
+
+      @returns: ArrayList<Individual> of size two, containing two children of
+      */
+
+      double a = 0.5; // parameter, mentioned in book p.67
+      // get parents value arrays
+      double p0[] = parents.get(0).getValues();
+      double p1[] = parents.get(1).getValues();
+      // Initialize children value arrays
+      double c0[] = new double[individual_size_];
+      double c1[] = new double[individual_size_];
+
+      double u = rnd_.nextDouble();
+      double gamma = ((1+(2*a))*u)-a;
+
+
+      ArrayList<Individual> children  = new ArrayList<Individual>(2);
+      for(int i=0; i<individual_size_; i++){
+        c0[i] = (1-gamma)*p0[i]+gamma*p1[i];
+        c1[i] = (1-gamma)*p1[i]+gamma*p0[i];
+      }
+
+      children.add(new Individual(c0));
+      children.add(new Individual(c1));
+      return children;
+    }
+
 
     public void run() {
         // Run your algorithm here
 
-        MatrixComp matrixComp = new MatrixComp();
-
-        int evals = 0;
-
-        int population_size = 10;
-
         // Initialize random population
-        double[][] population = initialize_population(population_size);
+        ArrayList<Individual> population = initialize_population();
 
-        // evaluate population
-        double[][] pop_fittness = evaluate_population(population, population_size, evaluation_);
-        evals += population_size;
+        // Rank population in fitness
+        Collections.sort(population);
 
-        displayArray(pop_fittness);
+        printPopulationFitness(population); // just for testing
 
-        Arrays.sort(pop_fittness, matrixComp);
+        while (evaluations_counter_ < evaluations_limit_) {
 
-        displayArray(pop_fittness);
+            // Create next generation (offspring)
+            ArrayList<Individual> offspring = new ArrayList<Individual>(population_size_);
+            while (offspring.size() < population_size_){
 
+              // Select 2 Parents (parents has size 2)
+              ArrayList<Individual> parents = tournamentSelection(population);
 
-        // calculate fitness
-        while (evals < evaluations_limit_) {
+              // Recombine Parents to receive 2 children (fitness not evaluated)
+              ArrayList<Individual> children = blendCrossover(parents);
 
-//            System.out.print("HELLO");
+              // TODO: Mutate children
+              children = children;
 
-            evals += 1000;
+              // Evaluate final children's fitness
+              for (Individual child: children){
+                child.setFitness(((double) evaluation_.evaluate(child.getValues())));
+                evaluations_counter_ += 1;
+              }
+              // add children to offspring
+              offspring.addAll(children);
+            }
 
-            // find a way to only evaluate the children every generation
-            // Evaluate whole population before loop
-            // Select parents
-            // Generate children with crossover and mutate
-            // Evaluate children
-            // concat children to parents and rank the
-            // select survivors with specific method, alter population and fitness array respectively
-            // Now new population with respective fittness values => only evaluate # of new children lambda
+          // TODO: SELECT individuals for next generation
+          // aka. Survivor Selection
 
-
-            // Select parents
-
-            // Apply crossover / mutation operators
-            //double child[] = {0.2, 0.8, 0.7, 0.0, 0.2, 0.6, 0.3, 0.3, 0.4, 0.6};
-
-
-            // Check fitness of unknown function
-            //Double fitness = (double) evaluation_.evaluate(child);
-            //evals++;
-            // Select survivors
         }
 
     }
 }
 
 
-class MatrixComp implements Comparator<double[]> {
+class Individual implements Comparable<Individual> {
+  /*
+  Class that wraps a single individual and its fitness.
+  Enables easy comparison among individuals.
+  */
+    private double values_[];
+    private double fitness_;
 
-    public int compare(double[] o1, double[] o2) {
-        //get the item ids which are at index 0 of the array
-        double itemIdOne = o1[0];
-        double itemIdTwo = o2[0];
-        // sort on item id
-        return Double.compare(itemIdOne, itemIdTwo);
+    public Individual (double values[])
+    {
+        values_ = values;
+    }
+
+    public Individual (double values[], double fitness)
+    {
+        fitness_  = fitness;
+        values_ = values;
+    }
+
+    public double getFitness()
+    {
+        return fitness_;
+    }
+
+    public double[] getValues()
+    {
+        return values_;
+    }
+
+    public void setFitness(double fitness){
+        fitness_  = fitness;
+    }
+
+    @Override
+    public int compareTo(Individual i) {
+        return this.fitness_ < i.getFitness() ? 1 : this.fitness_ > i.getFitness() ? -1 : 0;
     }
 }
-
