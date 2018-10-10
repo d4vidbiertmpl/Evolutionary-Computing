@@ -192,7 +192,7 @@ class Clustering_Utils{
   }
 
 
-  private double[] calcCentroid(ArrayList<Individual> cluster) {
+  public double[] calcCentroid(ArrayList<Individual> cluster) {
       /*
        * Calculates centroid of one cluster
        *
@@ -242,7 +242,7 @@ class Clustering_Utils{
       return new int[]{min_i, min_j};
   }
 
-  private double euclideanDistance(double[] a, double[] b) {
+  public double euclideanDistance(double[] a, double[] b) {
       /*
        * Calculates the euclidean distance between two individuals
        *
