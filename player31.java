@@ -174,6 +174,25 @@ public class player31 implements ContestSubmission {
        }
     }
 
+    private double measureDiversity(ArrayList<Individual> individuals){
+      /*
+       * Returns a measure of how diverse the individuals are.
+       * This measure is the average euclidian distance to the
+       * average individual.
+       */
+       double diff = 0.0;
+       double average[] =  clustering_utils.calcCentroid(individuals);
+
+       for (Individual individual : individuals){
+         double values[] = individual.getValues();
+         for(int i=0; i<parameters.individual_size; i++){
+           diff += clustering_utils.euclideanDistance(average, values);
+         }
+       }
+       return diff/individuals.size();
+    }
+
+
     // --------------------------------------------------------------------------
     // Following functions are just needed for testing purposes.
     // -------------------------------------------------------------------------
