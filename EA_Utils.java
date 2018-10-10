@@ -174,6 +174,20 @@ class EA_Utils{
         }
     }
   }
+
+    public void nonUniformMutation(Individual individual) {
+	double values[] = individual.getValues();
+	for (int j = 0; j < values.length; j++) {
+	    double random_gauss = rnd_.nextGaussian() * parameters.non_uniform_mutation_step_size + values[j];
+	    if (random_gauss < parameters.values_min) {
+		random_gauss = parameters.values_min;
+	    } else if (random_gauss > parameters.values_max) {
+		random_gauss = parameters.values_max;
+	    }
+
+	    values[j] = random_gauss;
+	}
+    }
   // --------------------------------------------------------------------------
   // --------------------------------------------------------------------------
 }

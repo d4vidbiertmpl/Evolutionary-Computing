@@ -126,8 +126,13 @@ public class player31 implements ContestSubmission {
                 // (3) MUTATE children
                 // (3.1) Uniform mutation
                 for (Individual child: children){
-                  ea_utils.uniformMutation(child);
-                }
+		    ea_utils.uniformMutation(child);
+		}
+
+		// (3.2) Non-uniform mutation
+                //for (Individual child: children){
+		//  ea_utils.nonUniformMutation(child);
+		//}
 
                 // Evaluate final children's fitness
                 evaluateIndividuals(children);

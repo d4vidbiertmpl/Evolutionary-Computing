@@ -26,6 +26,7 @@ class Parameters{
 
     // (2) Parameters for mutation
     public double uniform_mutation_prop = 0.05;
+    public double non_uniform_mutation_step_size = 0.3;
 
     // (3) Parameters for survivor selection
     public int survivor_tournament_size = 10;
