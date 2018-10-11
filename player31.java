@@ -78,123 +78,55 @@ public class player31 implements ContestSubmission {
 
 /*
     TODO: Implement first basic approach => maybe at least non-uniform mutation for that?
-
     TODO: Improve parent selection? => what selection pressure do we want to have?
-
     TODO: Implement more sophisticated approach with uncorrelated mutation with n step size
-
     TODO: Extend both approaches (simple and sophisticated) with the proletarian group approach
-
     TODO: Implement function to save data to csv files for visualization
-
     TODO: Implement visualization => reason about data ...
 */
 
     public void run() {
 
-        // Initialize random population
-        ArrayList<Individual> population = ea_utils.initialize_population();
-        evaluateIndividuals(population);
+        // Which experiment do we want to execute?
+        // simple_approach, simple_approach with own, sophisticated approach, sophisticated approach with own
 
-        // Rank population in fitness
-        Collections.sort(population);
+//        simple_approach();
+//        simple_approach_with_own();
+//        sophisticated_approach();
+        sophisticated_approach_with_own();
 
-        while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+    }
 
-            // Get top Individuals
-            // ArrayList<Individual> elitist = getElitistGroup(population
-
-            // Calculate Clusters
-            // double[][] elitist_clusters = calcElitistCluster(elitist, parameters.cluster_distance_thresh);
-            // printClusters(elitist_clusters); // for test purpose
-            // System.out.println(elitist_clusters.length);
-
-
-            ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
-            while (offspring.size() < parameters.offspring_size) {
-
-                // (1) PARENT SELECTION (parents has size 2)
-                ArrayList<Individual> parents = ea_utils.tournamentSelection(population, parameters.parent_tournament_size);
-
-                // (2) RECOMBINE Parents to receive 2 children (fitness not evaluated)
-                // (2.1) One Point Crossover
-                // ArrayList<Individual> children = onePointCrossover(parents);
-
-                // (2.2) Blend Crossover
-                ArrayList<Individual> children = ea_utils.blendCrossover(parents);
-
-                // (3) MUTATE children
-                // (3.1) Uniform mutation
-                for (Individual child: children){
-		    ea_utils.uniformMutation(child);
-		}
-
-		// (3.2) Non-uniform mutation
-                //for (Individual child: children){
-		//  ea_utils.nonUniformMutation(child);
-		//}
-
-                // Evaluate final children's fitness
-                evaluateIndividuals(children);
-
-                // Add children to offspring
-                offspring.addAll(children);
+    private void evaluateIndividuals(ArrayList<Individual> individuals) {
+        /*
+         * Evaluate + assign the fitness of every individual in individuals that
+         * has not yet been assigned a fitness.
+         */
+        for (Individual individual : individuals) {
+            if (!individual.isEvaluated()) { // if individual was not evaluated yet
+                double fitness = (double) evaluation_.evaluate(individual.getValues());
+                individual.setFitness(fitness);
+                evaluations_counter_ += 1;
             }
-
-            // (4) SURVIVOR SELECTION
-            // (4.1) Just replace whole population by offspring
-            // population = new ArrayList<Individual>(offspring);
-
-            // (4.2) Rank population+offspring and select parameters.population_size best.
-            // population.addAll(offspring);
-            // Collections.sort(population);
-            // population = new ArrayList<Individual>(population.subList(0, parameters.population_size));
-
-            // (4.3) tournamentSelection
-            population.addAll(offspring);
-            ArrayList<Individual> new_population = new ArrayList<Individual>(parameters.population_size);
-            while (new_population.size() < parameters.population_size) {
-              new_population.addAll(ea_utils.tournamentSelection(population, parameters.survivor_tournament_size));
-            }
-
-        population = new ArrayList<>(new_population); // copy new_population to population
-
-          // Function that introduces the random individuals => just needs to be properly embedded into the evaluations (causes Null pointer at the moment)
-          // population = generateRandomProletarians(population, elitist_clusters);
-
         }
     }
 
-    private void evaluateIndividuals(ArrayList<Individual> individuals){
-      /*
-       * Evaluate + assign the fitness of every individual in individuals that
-       * has not yet been assigned a fitness.
-       */
-       for(Individual individual : individuals){
-         if (!individual.isEvaluated()){ // if individual was not evaluated yet
-           double fitness = (double) evaluation_.evaluate(individual.getValues());
-           individual.setFitness(fitness);
-           evaluations_counter_ +=1;
-         }
-       }
-    }
+    private double measureDiversity(ArrayList<Individual> individuals) {
+        /*
+         * Returns a measure of how diverse the individuals are.
+         * This measure is the average euclidian distance to the
+         * average individual.
+         */
+        double diff = 0.0;
+        double average[] = clustering_utils.calcCentroid(individuals);
 
-    private double measureDiversity(ArrayList<Individual> individuals){
-      /*
-       * Returns a measure of how diverse the individuals are.
-       * This measure is the average euclidian distance to the
-       * average individual.
-       */
-       double diff = 0.0;
-       double average[] =  clustering_utils.calcCentroid(individuals);
-
-       for (Individual individual : individuals){
-         double values[] = individual.getValues();
-         for(int i=0; i<parameters.individual_size; i++){
-           diff += clustering_utils.euclideanDistance(average, values);
-         }
-       }
-       return diff/individuals.size();
+        for (Individual individual : individuals) {
+            double values[] = individual.getValues();
+            for (int i = 0; i < parameters.individual_size; i++) {
+                diff += clustering_utils.euclideanDistance(average, values);
+            }
+        }
+        return diff / individuals.size();
     }
 
 
@@ -238,5 +170,295 @@ public class player31 implements ContestSubmission {
         }
         System.out.println(fitness);
         System.out.println("\n------------------------------------------------------------------------------\n");
+    }
+
+    private void simple_approach() {
+
+        // Initialize random population
+        ArrayList<Individual> population = ea_utils.initialize_population(false);
+        evaluateIndividuals(population);
+
+        // Rank population in fitness
+        Collections.sort(population);
+
+        while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+
+            ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
+            while (offspring.size() < parameters.offspring_size) {
+
+                // (1) PARENT SELECTION (parents has size 2)
+                ArrayList<Individual> parents = ea_utils.tournamentSelection(population, parameters.parent_tournament_size);
+
+                // (2) RECOMBINE Parents to receive 2 children (fitness not evaluated)
+                // (2.1) One Point Crossover
+                // ArrayList<Individual> children = onePointCrossover(parents);
+
+                // (2.2) Blend Crossover
+//                 ArrayList<Individual> children = ea_utils.blendCrossover(parents);
+
+                // (2.3) Whole Arithmetic Recombination
+                ArrayList<Individual> children = ea_utils.wholeArithmeticRecombination(parents);
+
+                // (3) MUTATE children
+                // (3.1) Uniform mutation
+                for (Individual child : children) {
+//                     ea_utils.uniformMutation(child);
+                }
+
+                // (3.2) Non-uniform mutation
+                for (Individual child : children) {
+                    ea_utils.nonUniformMutation(child);
+                }
+
+                // Evaluate final children's fitness
+                evaluateIndividuals(children);
+
+                // Add children to offspring
+                offspring.addAll(children);
+            }
+
+            // (4) SURVIVOR SELECTION
+            // (4.1) Just replace whole population by offspring
+//             population = new ArrayList<Individual>(offspring);
+
+            // (4.2) Rank population+offspring and select parameters.population_size best.
+//             population.addAll(offspring);
+//             Collections.sort(population);
+//             population = new ArrayList<Individual>(population.subList(0, parameters.population_size));
+
+            // (4.3) tournamentSelection
+            population.addAll(offspring);
+            ArrayList<Individual> new_population = new ArrayList<Individual>(parameters.population_size);
+            while (new_population.size() < parameters.population_size) {
+                new_population.addAll(ea_utils.tournamentSelection(population, parameters.survivor_tournament_size));
+            }
+            population = new ArrayList<Individual>(new_population); // copy new_population to population
+
+        }
+
+
+    }
+
+    private void simple_approach_with_own() {
+
+        // Initialize random population
+        ArrayList<Individual> population = ea_utils.initialize_population(false);
+        evaluateIndividuals(population);
+
+        // Rank population in fitness
+        Collections.sort(population);
+
+        while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+
+            // Get top Individuals
+            ArrayList<Individual> elitist = clustering_utils.getElitistGroup(population);
+
+            // Calculate Clusters
+            double[][] elitist_clusters = clustering_utils.calcElitistCluster(elitist, parameters.cluster_distance_thresh);
+            // printClusters(elitist_clusters); // for test purpose
+            System.out.println(elitist_clusters.length);
+
+            ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
+            while (offspring.size() < parameters.offspring_size) {
+
+                // (1) PARENT SELECTION (parents has size 2)
+                ArrayList<Individual> parents = ea_utils.tournamentSelection(population, parameters.parent_tournament_size);
+
+                // (2) RECOMBINE Parents to receive 2 children (fitness not evaluated)
+                // (2.1) One Point Crossover
+                // ArrayList<Individual> children = onePointCrossover(parents);
+
+                // (2.2) Blend Crossover
+//                 ArrayList<Individual> children = ea_utils.blendCrossover(parents);
+
+                // (2.3) Whole Arithmetic Recombination
+                ArrayList<Individual> children = ea_utils.wholeArithmeticRecombination(parents);
+
+                // (3) MUTATE children
+                // (3.1) Uniform mutation
+                for (Individual child : children) {
+//                     ea_utils.uniformMutation(child);
+                }
+
+                // (3.2) Non-uniform mutation
+                for (Individual child : children) {
+                    ea_utils.nonUniformMutation(child);
+                }
+
+                // Evaluate final children's fitness
+                evaluateIndividuals(children);
+
+                // Add children to offspring
+                offspring.addAll(children);
+            }
+
+            // (4) SURVIVOR SELECTION
+            // (4.1) Just replace whole population by offspring
+//             population = new ArrayList<Individual>(offspring);
+
+            // (4.2) Rank population+offspring and select parameters.population_size best.
+//             population.addAll(offspring);
+//             Collections.sort(population);
+//             population = new ArrayList<Individual>(population.subList(0, parameters.population_size));
+
+            // (4.3) tournamentSelection
+            population.addAll(offspring);
+            ArrayList<Individual> new_population = new ArrayList<Individual>(parameters.population_size);
+            while (new_population.size() < parameters.population_size) {
+                new_population.addAll(ea_utils.tournamentSelection(population, parameters.survivor_tournament_size));
+            }
+            population = new ArrayList<Individual>(new_population); // copy new_population to population
+
+            ArrayList<Individual> proletarians = clustering_utils.generateRandomProletarians(elitist_clusters, false);
+            Collections.sort(population);
+            population = new ArrayList<Individual>(population.subList(0, (parameters.population_size - parameters.proletarian_size)));
+
+            for (int i = 0; i < parameters.proletarian_size; i++) {
+                Individual current_proletarian = proletarians.get(i);
+                double prol_fitness = (double) evaluation_.evaluate(current_proletarian.getValues());
+                current_proletarian.setFitness(prol_fitness);
+                evaluations_counter_ += 1;
+                population.add(current_proletarian);
+            }
+
+        }
+    }
+
+    private void sophisticated_approach() {
+
+        // Initialize random population
+        ArrayList<Individual> population = ea_utils.initialize_population(true);
+        evaluateIndividuals(population);
+
+        // Rank population in fitness
+        Collections.sort(population);
+
+        while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+
+
+            ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
+            while (offspring.size() < parameters.offspring_size) {
+
+                // (1) PARENT SELECTION (parents has size 2)
+                ArrayList<Individual> parents = ea_utils.tournamentSelection(population, parameters.parent_tournament_size);
+
+                // (2) RECOMBINE Parents to receive 2 children (fitness not evaluated)
+                // (2.2) Blend Crossover
+                ArrayList<Individual> children = ea_utils.blendCrossover(parents);
+//                ArrayList<Individual> children = ea_utils.wholeArithmeticRecombination(parents);
+
+
+                // (3) MUTATE children
+                // (3.1) Uniform mutation
+                for (Individual child : children) {
+                    ea_utils.adaptiveMutationNStSz(child);
+                }
+
+                // Evaluate final children's fitness
+                evaluateIndividuals(children);
+
+                // Add children to offspring
+                offspring.addAll(children);
+            }
+
+            // (4) SURVIVOR SELECTION
+            // (4.1) Just replace whole population by offspring
+            Collections.sort(offspring);
+            population = new ArrayList<Individual>(offspring.subList(0, parameters.population_size));
+
+            // (4.2) Rank population+offspring and select parameters.population_size best.
+//            population.addAll(offspring);
+//            Collections.sort(population);
+//            population = new ArrayList<Individual>(population.subList(0, parameters.population_size));
+
+
+            // (4.3) tournamentSelection
+//            population.addAll(offspring);
+//            ArrayList<Individual> new_population = new ArrayList<Individual>(parameters.population_size);
+//            while (new_population.size() < parameters.population_size) {
+//                new_population.addAll(ea_utils.tournamentSelection(population, parameters.survivor_tournament_size));
+//            }
+//            population = new ArrayList<Individual>(new_population); // copy new_population to population
+
+        }
+    }
+
+    private void sophisticated_approach_with_own() {
+
+        // Initialize random population
+        ArrayList<Individual> population = ea_utils.initialize_population(true);
+        evaluateIndividuals(population);
+
+        // Rank population in fitness
+        Collections.sort(population);
+
+        while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+
+            // Get top Individuals
+            ArrayList<Individual> elitist = clustering_utils.getElitistGroup(population);
+
+            // Calculate Clusters
+            double[][] elitist_clusters = clustering_utils.calcElitistCluster(elitist, parameters.cluster_distance_thresh);
+            // printClusters(elitist_clusters); // for test purpose
+            System.out.println(elitist_clusters.length);
+
+
+            ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
+            while (offspring.size() < parameters.offspring_size) {
+
+                // (1) PARENT SELECTION (parents has size 2)
+                ArrayList<Individual> parents = ea_utils.tournamentSelection(population, parameters.parent_tournament_size);
+
+                // (2) RECOMBINE Parents to receive 2 children (fitness not evaluated)
+                // (2.1) One Point Crossover
+                // ArrayList<Individual> children = onePointCrossover(parents);
+
+                // (2.2) Blend Crossover
+                ArrayList<Individual> children = ea_utils.blendCrossover(parents);
+
+                // (3) MUTATE children
+                // (3.1) Uniform mutation
+                for (Individual child : children) {
+                    ea_utils.adaptiveMutationNStSz(child);
+                }
+
+                // (3.2) Non-uniform mutation
+                //for (Individual child: children){
+                //  ea_utils.nonUniformMutation(child);
+                //}
+
+                // Evaluate final children's fitness
+                evaluateIndividuals(children);
+
+                // Add children to offspring
+                offspring.addAll(children);
+            }
+
+            // (4) SURVIVOR SELECTION
+            // (4.1) Just replace whole population by offspring
+            Collections.sort(offspring);
+            population = new ArrayList<Individual>(offspring.subList(0, parameters.population_size));
+
+            // (4.2) Rank population+offspring and select parameters.population_size best.
+//             population.addAll(offspring);
+//             Collections.sort(population);
+//             population = new ArrayList<Individual>(population.subList(0, parameters.population_size));
+
+            ArrayList<Individual> proletarians = clustering_utils.generateRandomProletarians(elitist_clusters, true);
+            Collections.sort(population);
+            population = new ArrayList<Individual>(population.subList(0, (parameters.population_size - parameters.proletarian_size)));
+
+            for (int i = 0; i < parameters.proletarian_size; i++) {
+                Individual current_proletarian = proletarians.get(i);
+                double prol_fitness = (double) evaluation_.evaluate(current_proletarian.getValues());
+                current_proletarian.setFitness(prol_fitness);
+                evaluations_counter_ += 1;
+                population.add(current_proletarian);
+            }
+
+            // Function that introduces the random individuals => just needs to be properly embedded into the evaluations (causes Null pointer at the moment)
+            // population = generateRandomProletarians(population, elitist_clusters);
+
+        }
     }
 }
