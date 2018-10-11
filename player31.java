@@ -2,6 +2,7 @@ import org.vu.contest.ContestSubmission;
 import org.vu.contest.ContestEvaluation;
 
 import javax.naming.directory.InitialDirContext;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Comparator;
 
@@ -26,6 +27,8 @@ public class player31 implements ContestSubmission {
     private int evaluations_limit_;   // number of allowed evaluations
     private int evaluations_counter_ = 0; // counter for performed evaluation
 
+    private int generation_;
+
 
     public player31() {
         rnd_ = new Random();
@@ -42,10 +45,10 @@ public class player31 implements ContestSubmission {
         clustering_utils.setSeed(rnd_.nextLong());
     }
 
-    public void setParams(){
+    public void setParams() {
         // parse parameters from command line
-        if(System.getProperty("non_uniform_mutation_step_size")!=null){
-          parameters.non_uniform_mutation_step_size = Double.parseDouble(System.getProperty("non_uniform_mutation_step_size"));
+        if (System.getProperty("non_uniform_mutation_step_size") != null) {
+            parameters.non_uniform_mutation_step_size = Double.parseDouble(System.getProperty("non_uniform_mutation_step_size"));
         }
     }
 
@@ -183,6 +186,26 @@ public class player31 implements ContestSubmission {
         System.out.println("\n------------------------------------------------------------------------------\n");
     }
 
+    private void printPopulationCSV(ArrayList<Individual> population) {
+        String csv_population = "";
+
+        for (int i = 0; i < parameters.population_size; i++) {
+            double[] v = population.get(i).getValues();
+            String csv_line = "";
+            for (int j = 0; j < parameters.individual_size - 1; j++) {
+                String value = Double.toString(v[j]);
+                String value_comma = value.concat(",");
+                csv_line = csv_line.concat(value_comma);
+            }
+            csv_line = csv_line.concat(Double.toString(v[9]));
+            csv_line = csv_line.concat("\n");
+
+            csv_population = csv_population.concat(csv_line);
+        }
+        csv_population = csv_population.concat("+");
+        System.out.println(csv_population);
+    }
+
     private void simple_approach() {
 
         // Initialize random population
@@ -290,13 +313,13 @@ public class player31 implements ContestSubmission {
 
                 // (3) MUTATE children
 
-                for (Individual child: children){
+                for (Individual child : children) {
 
-                  // (3.1) Uniform mutation
-                  //ea_utils.uniformMutation(child);
+                    // (3.1) Uniform mutation
+                    //ea_utils.uniformMutation(child);
 
-                  // (3.2) Non-Uniform Mutation
-                  ea_utils.nonUniformMutation(child);
+                    // (3.2) Non-Uniform Mutation
+                    ea_utils.nonUniformMutation(child);
                 }
 
                 // Evaluate final children's fitness
@@ -349,6 +372,9 @@ public class player31 implements ContestSubmission {
         Collections.sort(population);
 
         while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+
+
+            printPopulationCSV(population);
 
             ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
             while (offspring.size() < parameters.offspring_size) {
@@ -407,6 +433,9 @@ public class player31 implements ContestSubmission {
         Collections.sort(population);
 
         while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+            generation_++;
+
+            printPopulationCSV(population);
 
             // Get top Individuals
             ArrayList<Individual> elitist = clustering_utils.getElitistGroup(population);
@@ -414,7 +443,7 @@ public class player31 implements ContestSubmission {
             // Calculate Clusters
             double[][] elitist_clusters = clustering_utils.calcElitistCluster(elitist, parameters.cluster_distance_thresh);
             // printClusters(elitist_clusters); // for test purpose
-            System.out.println(elitist_clusters.length);
+//            System.out.println(elitist_clusters.length);
 
 
             ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);

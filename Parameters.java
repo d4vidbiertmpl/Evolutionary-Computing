@@ -19,10 +19,10 @@ class Parameters{
 
 
     // Parameters for the EA-components
-    public int offspring_size = 120;  //TODO: Should that be more/less ?
+    public int offspring_size = 150;  //TODO: Should that be more/less ?
 
     // (1) Parameters for parent selection
-    public int parent_tournament_size = 10;
+    public int parent_tournament_size = 5;
 
     // (2) Parameters for mutation
     public double uniform_mutation_prop = 0.05;

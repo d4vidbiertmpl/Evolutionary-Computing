@@ -1,6 +1,12 @@
 # Ignore everything
 *
+/*
+/*/
+
 
 # But not these files...
+!/saved_runs/*
 !.gitignore
 !MainClass.txt
+!*.java
+!*.py
