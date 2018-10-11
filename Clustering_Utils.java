@@ -12,12 +12,17 @@ class Clustering_Utils{
 
   private EA_Utils ea_utils;
 
-  public Clustering_Utils() {
-      parameters = new Parameters();
-      ea_utils = new EA_Utils();
+  public Clustering_Utils(Parameters params) {
+      parameters = params;
+      ea_utils = new EA_Utils(params);
       rnd_ = new Random();
       rnd_.setSeed(16438320L);
   }
+
+  public void setSeed(long seed) {
+      rnd_.setSeed(seed);
+  }
+
 
   public double[][] calcElitistCluster(ArrayList<Individual> elitist, double distance_threshold) {
       /*

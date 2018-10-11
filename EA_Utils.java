@@ -14,11 +14,16 @@ class EA_Utils{
 
   private Random rnd_;
 
-  public EA_Utils() {
-      parameters = new Parameters();
+  public EA_Utils(Parameters params) {
+      parameters = params;
       rnd_ = new Random();
       rnd_.setSeed(16438320L);
   }
+
+  public void setSeed(long seed) {
+      rnd_.setSeed(seed);
+  }
+
 
   // --------------------------------------------------------------------------
   // (1) Functions for Intitalization
@@ -176,17 +181,20 @@ class EA_Utils{
   }
 
     public void nonUniformMutation(Individual individual) {
-	double values[] = individual.getValues();
-	for (int j = 0; j < values.length; j++) {
-	    double random_gauss = rnd_.nextGaussian() * parameters.non_uniform_mutation_step_size + values[j];
-	    if (random_gauss < parameters.values_min) {
-		random_gauss = parameters.values_min;
-	    } else if (random_gauss > parameters.values_max) {
-		random_gauss = parameters.values_max;
-	    }
+      /*
+       * Performs non-uniform mutation on individual.
+       */
+    	double values[] = individual.getValues();
+    	for (int j = 0; j < values.length; j++) {
+    	    double random_gauss = rnd_.nextGaussian() * parameters.non_uniform_mutation_step_size + values[j];
+    	    if (random_gauss < parameters.values_min) {
+    		random_gauss = parameters.values_min;
+    	    } else if (random_gauss > parameters.values_max) {
+    		random_gauss = parameters.values_max;
+    	    }
 
-	    values[j] = random_gauss;
-	}
+    	    values[j] = random_gauss;
+    	}
     }
   // --------------------------------------------------------------------------
   // --------------------------------------------------------------------------
