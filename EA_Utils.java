@@ -14,10 +14,14 @@ class EA_Utils {
 
     private Random rnd_;
 
-    public EA_Utils() {
-        parameters = new Parameters();
+    public EA_Utils(Parameters params) {
+        parameters = params;
         rnd_ = new Random();
         rnd_.setSeed(16438320L);
+    }
+
+    public void setSeed(long seed) {
+        rnd_.setSeed(seed);
     }
 
     // --------------------------------------------------------------------------

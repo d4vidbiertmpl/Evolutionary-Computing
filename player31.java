@@ -30,12 +30,23 @@ public class player31 implements ContestSubmission {
     public player31() {
         rnd_ = new Random();
         parameters = new Parameters();
-        ea_utils = new EA_Utils();
-        clustering_utils = new Clustering_Utils();
+        ea_utils = new EA_Utils(parameters);
+        clustering_utils = new Clustering_Utils(parameters);
+
+        setParams();
     }
 
     public void setSeed(long seed) {
         rnd_.setSeed(seed);
+        ea_utils.setSeed(rnd_.nextLong());
+        clustering_utils.setSeed(rnd_.nextLong());
+    }
+
+    public void setParams(){
+        // parse parameters from command line
+        if(System.getProperty("non_uniform_mutation_step_size")!=null){
+          parameters.non_uniform_mutation_step_size = Double.parseDouble(System.getProperty("non_uniform_mutation_step_size"));
+        }
     }
 
     public void setEvaluation(ContestEvaluation evaluation) {
@@ -246,9 +257,12 @@ public class player31 implements ContestSubmission {
         evaluateIndividuals(population);
 
         // Rank population in fitness
-        Collections.sort(population);
+        // Collections.sort(population);
 
         while (evaluations_counter_ < evaluations_limit_) {  // until no exception
+
+            // Test for diversity
+            //System.out.println(measureDiversity(population));
 
             // Get top Individuals
             ArrayList<Individual> elitist = clustering_utils.getElitistGroup(population);
@@ -275,14 +289,14 @@ public class player31 implements ContestSubmission {
                 ArrayList<Individual> children = ea_utils.wholeArithmeticRecombination(parents);
 
                 // (3) MUTATE children
-                // (3.1) Uniform mutation
-                for (Individual child : children) {
-//                     ea_utils.uniformMutation(child);
-                }
 
-                // (3.2) Non-uniform mutation
-                for (Individual child : children) {
-                    ea_utils.nonUniformMutation(child);
+                for (Individual child: children){
+
+                  // (3.1) Uniform mutation
+                  //ea_utils.uniformMutation(child);
+
+                  // (3.2) Non-Uniform Mutation
+                  ea_utils.nonUniformMutation(child);
                 }
 
                 // Evaluate final children's fitness
@@ -303,6 +317,7 @@ public class player31 implements ContestSubmission {
 
             // (4.3) tournamentSelection
             population.addAll(offspring);
+
             ArrayList<Individual> new_population = new ArrayList<Individual>(parameters.population_size);
             while (new_population.size() < parameters.population_size) {
                 new_population.addAll(ea_utils.tournamentSelection(population, parameters.survivor_tournament_size));
@@ -334,7 +349,6 @@ public class player31 implements ContestSubmission {
         Collections.sort(population);
 
         while (evaluations_counter_ < evaluations_limit_) {  // until no exception
-
 
             ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
             while (offspring.size() < parameters.offspring_size) {
