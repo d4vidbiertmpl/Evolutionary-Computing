@@ -81,6 +81,14 @@ public class player31 implements ContestSubmission {
         if (System.getProperty("cluster_distance_thresh") != null) {
           parameters.cluster_distance_thresh = Double.parseDouble(System.getProperty("cluster_distance_thresh"));
         }
+	if (System.getProperty("hill_climb_step_size") != null) {
+	  parameters.hill_climb_step_size = Double.parseDouble(System.getProperty("hill_climb_step_size"));
+        }
+	if (System.getProperty("evaluations_per_proletarian") != null) {
+	    double d = Double.parseDouble(System.getProperty("evaluations_per_proletarian"));
+	    int i = (int) d;
+	    parameters.evaluations_per_proletarian = i;
+	}       
     }
 
     public void setEvaluation(ContestEvaluation evaluation) {

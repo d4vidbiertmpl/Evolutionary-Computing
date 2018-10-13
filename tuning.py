@@ -154,7 +154,9 @@ if __name__ == "__main__":
                 ["offspring_size", [50,100], "int"],
                 ["parent_tournament_size",[2,50], "int"],
                 ["survivor_tournament_size",[2,50], "int"],
-                ["non_uniform_mutation_step_size", [0.05, 3], "float"]]
+                ["non_uniform_mutation_step_size", [0.05, 3], "float"],
+                ["hill_climb_step_size", [0.1, 2], "float"],
+                ["evaluations_per_proletarian", [40, 100], "int"]]
 
     #params of the revac opimizer
     population_size=100
