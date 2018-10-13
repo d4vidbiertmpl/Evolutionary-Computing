@@ -38,6 +38,7 @@ class Parameters{
 
     // (4) Parameters for hybridisation
     public int evaluations_per_proletarian = 50;
-    public boolean use_hybridisation = true; //If true, hybridisation will be used on multimodal functions only 
+    public boolean use_hybridisation = true; //If true, hybridisation will be used in the 'sophisticated approach with own' on multimodal functions only
+    public double hill_climb_step_size = 1.0;
 
 }

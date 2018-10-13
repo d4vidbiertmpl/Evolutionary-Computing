@@ -137,8 +137,8 @@ public class player31 implements ContestSubmission {
 
 //        simple_approach();
 //        simple_approach_with_own();
-       sophisticated_approach();
-        //sophisticated_approach_with_own();
+//        sophisticated_approach();
+       sophisticated_approach_with_own();
 
     }
 
@@ -251,7 +251,7 @@ public class player31 implements ContestSubmission {
 	double original_values[] = proletarian.getValues();
 	double values[] = original_values.clone();
         for (int i = 0; i < original_values.length; i++) {
-            double random_gauss = rnd_.nextGaussian() * parameters.non_uniform_mutation_step_size + original_values[i];
+            double random_gauss = rnd_.nextGaussian() * parameters.hill_climb_step_size + original_values[i];
             if (random_gauss < parameters.values_min) {
                 random_gauss = parameters.values_min;
             } else if (random_gauss > parameters.values_max) {
