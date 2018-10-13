@@ -36,4 +36,8 @@ class Parameters{
     // (3) Parameters for survivor selection
     public int survivor_tournament_size = 10;
 
+    // (4) Parameters for hybridisation
+    public int evaluations_per_proletarian = 50;
+    public boolean use_hybridisation = true; //If true, hybridisation will be used on multimodal functions only 
+
 }

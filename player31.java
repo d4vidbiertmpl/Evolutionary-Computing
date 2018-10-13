@@ -206,6 +206,44 @@ public class player31 implements ContestSubmission {
         System.out.println(csv_population);
     }
 
+    
+    // --------------------------------------------------------------------------
+    // Functions for Hybridisation
+    // -------------------------------------------------------------------------
+
+    public Individual hillClimb(Individual proletarian, int evaluations_left) {
+
+	if (evaluations_left == 0) {
+	    return proletarian;
+	}
+
+	double original_values[] = proletarian.getValues();
+	double values[] = original_values.clone();
+        for (int i = 0; i < original_values.length; i++) {
+            double random_gauss = rnd_.nextGaussian() * parameters.non_uniform_mutation_step_size + original_values[i];
+            if (random_gauss < parameters.values_min) {
+                random_gauss = parameters.values_min;
+            } else if (random_gauss > parameters.values_max) {
+                random_gauss = parameters.values_max;
+            }
+
+            values[i] = random_gauss;
+	}       	
+	
+	double possible_impr_fitness = (double) evaluation_.evaluate(values);
+        evaluations_counter_ += 1;
+	if (possible_impr_fitness > proletarian.getFitness()) {
+	    Individual possible_improvement = new Individual(values, proletarian.isAdaptive_());
+	    possible_improvement.setFitness(possible_impr_fitness);
+	    return hillClimb(possible_improvement, evaluations_left -1);
+	} else {
+	    return hillClimb(proletarian, evaluations_left - 1);
+	}
+    }
+
+    // --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+
     private void simple_approach() {
 
         // Initialize random population
@@ -496,6 +534,13 @@ public class player31 implements ContestSubmission {
                 double prol_fitness = (double) evaluation_.evaluate(current_proletarian.getValues());
                 current_proletarian.setFitness(prol_fitness);
                 evaluations_counter_ += 1;
+
+		Properties props = evaluation_.getProperties();
+		if (parameters.use_hybridisation && Boolean.parseBoolean(props.getProperty("Multimodal"))
+		    && ((evaluations_limit_ - evaluations_counter_) > parameters.evaluations_per_proletarian)) {
+		    current_proletarian = hillClimb(current_proletarian, parameters.evaluations_per_proletarian);
+		}
+
                 population.add(current_proletarian);
             }
 
