@@ -46,9 +46,43 @@ public class player31 implements ContestSubmission {
     }
 
     public void setParams() {
+
+        double i;
+        int i;
+
         // parse parameters from command line
         if (System.getProperty("non_uniform_mutation_step_size") != null) {
             parameters.non_uniform_mutation_step_size = Double.parseDouble(System.getProperty("non_uniform_mutation_step_size"));
+        }
+        if (System.getProperty("offspring_size") != null) {
+          d = Double.parseDouble(System.getProperty("offspring_size"));
+          i = (int) d;
+          parameters.offspring_size = i;
+        }
+        if (System.getProperty("parent_tournament_size") != null) {
+          d = Double.parseDouble(System.getProperty("parent_tournament_size"));
+          i = (int) d;
+          parameters.parent_tournament_size = i;
+        }
+        if (System.getProperty("survivor_tournament_size") != null) {
+          d = Double.parseDouble(System.getProperty("survivor_tournament_size"));
+          i = (int) d;
+          parameters.survivor_tournament_size = i;
+        }
+
+        // Parameters for the clustering
+        if (System.getProperty("elitist_size") != null) {
+          d = Double.parseDouble(System.getProperty("elitist_size"));
+          i = (int) d;
+          parameters.elitist_size = i;
+        }
+        if (System.getProperty("proletarian_size") != null) {
+          d = Double.parseDouble(System.getProperty("proletarian_size"));
+          i = (int) d;
+          parameters.proletarian_size = i;
+        }
+        if (System.getProperty("cluster_distance_thresh") != null) {
+          parameters.cluster_distance_thresh = Double.parseDouble(System.getProperty("cluster_distance_thresh"));
         }
     }
 
@@ -106,8 +140,8 @@ public class player31 implements ContestSubmission {
 
 //        simple_approach();
 //        simple_approach_with_own();
-//        sophisticated_approach();
-        sophisticated_approach_with_own();
+       sophisticated_approach();
+        //sophisticated_approach_with_own();
 
     }
 
