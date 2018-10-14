@@ -13,9 +13,9 @@ os.system(
 os.system("javac -cp contest.jar player31.java Parameters.java Individual.java EA_Utils.java Clustering_Utils.java")
 # os.system("java -jar testrun.jar -submission=player31  -evaluation=SchaffersEvaluation -seed=1")
 
-print "HERE PYTHON SCRIPT"
+print "HERE PYTHON SCRIPT                         "
 
-output = os.popen('java -jar testrun.jar -submission=player31  -evaluation=SchaffersEvaluation -seed=1').readlines()
+output = os.popen('java -jar testrun.jar -submission=player31  -evaluation=SchaffersEvaluation -seed=2').readlines()
 
 populations = [list(group) for k, group in itertools.groupby(output, lambda x: x.strip() == "+") if not k][:-1]
 
@@ -35,6 +35,6 @@ for population in populations:
 
     numpy_populations = np.append(numpy_populations, np.reshape(numpy_population, (1, 100, 10)), axis=0)
 
-np.save("saved_runs/01_Schaffers_11_10_parameters", np.float64(numpy_populations))
+np.save("saved_runs/03_Schaffers_14_10_parameters_wo_own", np.float64(numpy_populations))
 
 print "success"

@@ -131,6 +131,19 @@ class EA_Utils {
                 c0[i] = (1 - gamma) * p0[i] + gamma * p1[i];
                 c1[i] = (1 - gamma) * p1[i] + gamma * p0[i];
 
+                if (c0[i] < parameters.values_min) {
+                    c0[i] = parameters.values_min;
+                }
+                if (c0[i] > parameters.values_max) {
+                    c0[i] = parameters.values_max;
+                }
+                if (c1[i] < parameters.values_min) {
+                    c1[i] = parameters.values_min;
+                }
+                if (c1[i] > parameters.values_max) {
+                    c1[i] = parameters.values_max;
+                }
+
                 // recombine step size
                 sz_c0[i] = (1 - gamma) * sz_p1[i] + gamma * sz_p0[i];
                 sz_c1[i] = (1 - gamma) * sz_p1[i] + gamma * sz_p0[i];
@@ -153,6 +166,20 @@ class EA_Utils {
             for (int i = 0; i < parameters.individual_size; i++) {
                 c0[i] = (1 - gamma) * p0[i] + gamma * p1[i];
                 c1[i] = (1 - gamma) * p1[i] + gamma * p0[i];
+
+
+                if (c0[i] < parameters.values_min) {
+                    c0[i] = parameters.values_min;
+                }
+                if (c0[i] > parameters.values_max) {
+                    c0[i] = parameters.values_max;
+                }
+                if (c1[i] < parameters.values_min) {
+                    c1[i] = parameters.values_min;
+                }
+                if (c1[i] > parameters.values_max) {
+                    c1[i] = parameters.values_max;
+                }
             }
 
             children.add(new Individual(c0, false));
@@ -216,6 +243,20 @@ class EA_Utils {
         for (int i = 0; i < parameters.individual_size; i++) {
             c0[i] = a * p0[i] + (1 - a) * p1[i];
             c1[i] = a * p0[i] + (1 - a) * p1[i];
+
+            if (c0[i] < parameters.values_min) {
+                c0[i] = parameters.values_min;
+            }
+            if (c0[i] > parameters.values_max) {
+                c0[i] = parameters.values_max;
+            }
+            if (c1[i] < parameters.values_min) {
+                c1[i] = parameters.values_min;
+            }
+            if (c1[i] > parameters.values_max) {
+                c1[i] = parameters.values_max;
+            }
+
         }
         children.add(new Individual(c0, false));
         children.add(new Individual(c1, false));
@@ -276,6 +317,14 @@ class EA_Utils {
             double x_i_prime = values[i] + sigma_prime * normal_i;
 
             values[i] = x_i_prime;
+
+            if (values[i] < parameters.values_min) {
+                values[i] = parameters.values_min;
+            }
+            if (values[i] > parameters.values_max) {
+                values[i] = parameters.values_max;
+            }
+
             step_sizes[i] = sigma_prime;
         }
 

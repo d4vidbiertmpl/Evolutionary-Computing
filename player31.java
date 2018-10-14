@@ -52,43 +52,43 @@ public class player31 implements ContestSubmission {
             parameters.non_uniform_mutation_step_size = Double.parseDouble(System.getProperty("non_uniform_mutation_step_size"));
         }
         if (System.getProperty("offspring_size") != null) {
-          double d = Double.parseDouble(System.getProperty("offspring_size"));
-          int i = (int) d;
-          parameters.offspring_size = i;
+            double d = Double.parseDouble(System.getProperty("offspring_size"));
+            int i = (int) d;
+            parameters.offspring_size = i;
         }
         if (System.getProperty("parent_tournament_size") != null) {
-          double d = Double.parseDouble(System.getProperty("parent_tournament_size"));
-          int i = (int) d;
-          parameters.parent_tournament_size = i;
+            double d = Double.parseDouble(System.getProperty("parent_tournament_size"));
+            int i = (int) d;
+            parameters.parent_tournament_size = i;
         }
         if (System.getProperty("survivor_tournament_size") != null) {
-          double d = Double.parseDouble(System.getProperty("survivor_tournament_size"));
-          int i = (int) d;
-          parameters.survivor_tournament_size = i;
+            double d = Double.parseDouble(System.getProperty("survivor_tournament_size"));
+            int i = (int) d;
+            parameters.survivor_tournament_size = i;
         }
 
         // Parameters for the clustering
         if (System.getProperty("elitist_size") != null) {
-          double d = Double.parseDouble(System.getProperty("elitist_size"));
-          int i = (int) d;
-          parameters.elitist_size = i;
+            double d = Double.parseDouble(System.getProperty("elitist_size"));
+            int i = (int) d;
+            parameters.elitist_size = i;
         }
         if (System.getProperty("proletarian_size") != null) {
-          double d = Double.parseDouble(System.getProperty("proletarian_size"));
-          int i = (int) d;
-          parameters.proletarian_size = i;
+            double d = Double.parseDouble(System.getProperty("proletarian_size"));
+            int i = (int) d;
+            parameters.proletarian_size = i;
         }
         if (System.getProperty("cluster_distance_thresh") != null) {
-          parameters.cluster_distance_thresh = Double.parseDouble(System.getProperty("cluster_distance_thresh"));
+            parameters.cluster_distance_thresh = Double.parseDouble(System.getProperty("cluster_distance_thresh"));
         }
-	if (System.getProperty("hill_climb_step_size") != null) {
-	  parameters.hill_climb_step_size = Double.parseDouble(System.getProperty("hill_climb_step_size"));
+        if (System.getProperty("hill_climb_step_size") != null) {
+            parameters.hill_climb_step_size = Double.parseDouble(System.getProperty("hill_climb_step_size"));
         }
-	if (System.getProperty("evaluations_per_proletarian") != null) {
-	    double d = Double.parseDouble(System.getProperty("evaluations_per_proletarian"));
-	    int i = (int) d;
-	    parameters.evaluations_per_proletarian = i;
-	}       
+        if (System.getProperty("evaluations_per_proletarian") != null) {
+            double d = Double.parseDouble(System.getProperty("evaluations_per_proletarian"));
+            int i = (int) d;
+            parameters.evaluations_per_proletarian = i;
+        }
     }
 
     public void setEvaluation(ContestEvaluation evaluation) {
@@ -146,7 +146,7 @@ public class player31 implements ContestSubmission {
 //        simple_approach();
 //        simple_approach_with_own();
 //        sophisticated_approach();
-       sophisticated_approach_with_own();
+        sophisticated_approach_with_own();
 
     }
 
@@ -157,9 +157,13 @@ public class player31 implements ContestSubmission {
          */
         for (Individual individual : individuals) {
             if (!individual.isEvaluated()) { // if individual was not evaluated yet
-                double fitness = (double) evaluation_.evaluate(individual.getValues());
-                individual.setFitness(fitness);
-                evaluations_counter_ += 1;
+                if (evaluations_counter_ < evaluations_limit_) {
+                    double fitness = (double) evaluation_.evaluate(individual.getValues());
+                    individual.setFitness(fitness);
+                    evaluations_counter_ += 1;
+                } else {
+                    individual.setFitness(0.0);
+                }
             }
         }
     }
@@ -245,19 +249,19 @@ public class player31 implements ContestSubmission {
         System.out.println(csv_population);
     }
 
-    
+
     // --------------------------------------------------------------------------
     // Functions for Hybridisation
     // -------------------------------------------------------------------------
 
     public Individual hillClimb(Individual proletarian, int evaluations_left) {
 
-	if (evaluations_left == 0) {
-	    return proletarian;
-	}
+        if (evaluations_left == 0) {
+            return proletarian;
+        }
 
-	double original_values[] = proletarian.getValues();
-	double values[] = original_values.clone();
+        double original_values[] = proletarian.getValues();
+        double values[] = original_values.clone();
         for (int i = 0; i < original_values.length; i++) {
             double random_gauss = rnd_.nextGaussian() * parameters.hill_climb_step_size + original_values[i];
             if (random_gauss < parameters.values_min) {
@@ -267,17 +271,17 @@ public class player31 implements ContestSubmission {
             }
 
             values[i] = random_gauss;
-	}       	
-	
-	double possible_impr_fitness = (double) evaluation_.evaluate(values);
+        }
+
+        double possible_impr_fitness = (double) evaluation_.evaluate(values);
         evaluations_counter_ += 1;
-	if (possible_impr_fitness > proletarian.getFitness()) {
-	    Individual possible_improvement = new Individual(values, proletarian.isAdaptive_());
-	    possible_improvement.setFitness(possible_impr_fitness);
-	    return hillClimb(possible_improvement, evaluations_left -1);
-	} else {
-	    return hillClimb(proletarian, evaluations_left - 1);
-	}
+        if (possible_impr_fitness > proletarian.getFitness()) {
+            Individual possible_improvement = new Individual(values, proletarian.isAdaptive_());
+            possible_improvement.setFitness(possible_impr_fitness);
+            return hillClimb(possible_improvement, evaluations_left - 1);
+        } else {
+            return hillClimb(proletarian, evaluations_left - 1);
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -574,11 +578,11 @@ public class player31 implements ContestSubmission {
                 current_proletarian.setFitness(prol_fitness);
                 evaluations_counter_ += 1;
 
-		Properties props = evaluation_.getProperties();
-		if (parameters.use_hybridisation && Boolean.parseBoolean(props.getProperty("Multimodal"))
-		    && ((evaluations_limit_ - evaluations_counter_) > parameters.evaluations_per_proletarian)) {
-		    current_proletarian = hillClimb(current_proletarian, parameters.evaluations_per_proletarian);
-		}
+                Properties props = evaluation_.getProperties();
+                if (parameters.use_hybridisation && Boolean.parseBoolean(props.getProperty("Multimodal"))
+                        && ((evaluations_limit_ - evaluations_counter_) > parameters.evaluations_per_proletarian)) {
+                    current_proletarian = hillClimb(current_proletarian, parameters.evaluations_per_proletarian);
+                }
 
                 population.add(current_proletarian);
             }
