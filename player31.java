@@ -574,9 +574,15 @@ public class player31 implements ContestSubmission {
 
             for (int i = 0; i < parameters.proletarian_size; i++) {
                 Individual current_proletarian = proletarians.get(i);
-                double prol_fitness = (double) evaluation_.evaluate(current_proletarian.getValues());
-                current_proletarian.setFitness(prol_fitness);
-                evaluations_counter_ += 1;
+
+                if (evaluations_counter_ < evaluations_limit_){
+                  double prol_fitness = (double) evaluation_.evaluate(current_proletarian.getValues());
+                  current_proletarian.setFitness(prol_fitness);
+                  evaluations_counter_ += 1;
+                }
+                else{
+                  current_proletarian.setFitness(0.0);
+                }
 
                 Properties props = evaluation_.getProperties();
                 if (parameters.use_hybridisation && Boolean.parseBoolean(props.getProperty("Multimodal"))
