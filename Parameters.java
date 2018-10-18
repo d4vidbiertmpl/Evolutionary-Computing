@@ -9,20 +9,20 @@ class Parameters{
     public static final double values_min = -5.0;
     public static final double values_max =  5.0;
     // number of individuals of one population
-    public static final int population_size = 100;
+    public static int population_size = 100;
 
 
     // Parameters for the clustering
-    public int elitist_size = 5;
-    public int proletarian_size = 13;
+    public int elitist_size = 10*population_size/100;
+    public int proletarian_size = 15*population_size/100;
     public double cluster_distance_thresh = 1.3007402405183437;
 
 
     // Parameters for the EA-components
-    public int offspring_size = 100;  //TODO: Should that be more/less ?
+    public int offspring_size = 100;
 
     // (1) Parameters for parent selection
-    public int parent_tournament_size = 14;
+    public int parent_tournament_size = 47;
 
     // (2) Parameters for mutation
     public double uniform_mutation_prop = 0.05;
@@ -32,12 +32,12 @@ class Parameters{
     public double tau = 1 / Math.sqrt(2*individual_size);
     public double tau_prime = 1 / Math.sqrt(2*Math.sqrt(individual_size));
     public double boundary = 0.01;
-    
+
     // (3) Parameters for survivor selection
     public int survivor_tournament_size = 4;
 
     // (4) Parameters for hybridisation
-    public int evaluations_per_proletarian = 81;
+    public int evaluations_per_proletarian = 10;
     public boolean use_hybridisation = true; //If true, hybridisation will be used in the 'sophisticated approach with own' on multimodal functions only
     public double hill_climb_step_size = 0.6827029110776486;
 

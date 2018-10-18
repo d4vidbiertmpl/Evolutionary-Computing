@@ -7,17 +7,27 @@ This implementation follows the decription of the REVAC optimizer in
 https://www.ijcai.org/Proceedings/07/Papers/157.pdf .
 """
 
+def testDiversity():
+    x = os.popen(build_command([],[])).readlines()
+    diversities = [i.split()[1] for i in x if 'Diversity:' in i]
+    for d in diversities:
+        with open("divs.txt", 'a') as f:
+            f.write(d+"\n")
+
 def build_command(parameter_values, parameter_names):
     """
     Builds the command to run the Java application according to given parameters.
     """
     # check if same amount of values and fields
     assert len(parameter_values) == len(parameter_names)
-
     command = "java "
     for name, value in zip(parameter_names, parameter_values):
-        command+="-D"+name+"="+str(value)+" "
-    command += "-jar testrun.jar -submission=player31 -evaluation=BentCigarFunction -seed="
+        if name=="offspring_percentage":
+            pop_size = parameter_values[parameter_names.index("population_size")];
+            command+="-Doffspring_size="+str(round(value*pop_size/100))+" "
+        else:
+            command+="-D"+name+"="+str(value)+" "
+    command += "-jar testrun.jar -submission=player31 -evaluation=KatsuuraEvaluation -seed="
     seed = random.randint(0,10000000)
     return command+str(seed);
 
@@ -28,14 +38,18 @@ def log_vector(vector, response, evaluation=0, path="revac_output.txt"):
     with open(path, 'a') as f:
         f.write("["+str(evaluation)+"\t"+str(vector)+"\t"+str(response)+"] \n")
 
-def evaluate_parameters(parameter_vector, parameter_names, num_runs):
+def evaluate_parameters(parameter_vector, parameter_names, num_runs, ini=false):
     """
     Evaluates parameter_vector by computings its average performance over num_runs runs.
     """
     score =  0.0
     for r in range(num_runs):
-        x = os.popen(build_command(parameter_vector, parameter_names)).readlines()
-        score += float([i for i in x if 'Score:' in i][0].split()[1])
+        command = build_command(parameter_vector, parameter_names)
+        x = os.popen(command).readlines()
+        utility =  float([i for i in x if 'Score:' in i][0].split()[1])
+        score += utility
+    if ini:
+        log_vector(parameter_vector, score/num_runs, evaluation="RANDOM:  ")
     return score/num_runs
 
 def multi_parent_crossover(parents):
@@ -79,7 +93,7 @@ def revac_mutation(child, parents, h, parameters_info):
     return mutated_child
 
 
-def tune(parameters, population_size=80, parent_size=35, h=5, runs_per_vector=1):
+def tune(parameters, population_size=80, parent_size=35, h=5, runs_per_vector=1, total_evaluations=1000):
     """
     Tunes a given algorithm using REVAC optimization.
     """
@@ -87,6 +101,7 @@ def tune(parameters, population_size=80, parent_size=35, h=5, runs_per_vector=1)
 
     # (1) Draw an initial set of parameter vectors at uniform random from
     # their initial distributions.
+
     population = []
     for i in range(population_size):
         vector = []
@@ -95,22 +110,24 @@ def tune(parameters, population_size=80, parent_size=35, h=5, runs_per_vector=1)
             if p[2]=="float":
                 vector += [np.random.uniform(p[1][0], p[1][1])]
             if p[2]=="int":
-                vector += [np.random.randint(p[1][0], p[1][1]+1)]
+                vector += [random.randint(p[1][0], p[1][1])]
         population += [vector]
+    #draw initial samples with latin hypercube sampling
+    #population = latin_hypercube_sampling(parameters)
+    #print("Initialized. Start Evaluation")
 
     # (2) Compute the utility of each parameter vector, before finding and recording the best parameter vector
-    utility_table = [evaluate_parameters(parameter_vector, parameter_names,runs_per_vector) for parameter_vector in population]
+    utility_table = [evaluate_parameters(parameter_vector, parameter_names,runs_per_vector, ini=true) for parameter_vector in population]
 
     # log best parameters
     max_utility = max(utility_table)
     best_parameter_vector = population[utility_table.index(max_utility)]
     log_vector(best_parameter_vector, max_utility)
 
-    # TODO: Different termination condition?
     evaluations=0
     oldest_index=0
 
-    while(evaluations<1000):
+    while(evaluations<total_evaluations):
         # (3) Select the parent_size-best vectors from the table as the parents
         # of the next parameter vector.
         parent_indices = np.argpartition(utility_table, -parent_size)[-parent_size:]
@@ -143,26 +160,130 @@ def tune(parameters, population_size=80, parent_size=35, h=5, runs_per_vector=1)
     # Return optimal parameter vectore
     return best_parameter_vector
 
+def latin_hypercube_sampling(parameters, k=100):
+    # divide range of each dimension into k equally sized intervals
+    ranges_parameters = []
+    for p in parameters:
+        rng = p[1]
+        x = np.linspace(rng[0],rng[1], k+1)
+        if p[2]=="int":
+            x = [round(i) for i in x]
+        # ranges for parameters
+        y = []
+        for i in range(len(x)-1):
+            y += [[x[i], x[i+1]]]
+        ranges_parameters += [y]
+
+    # For each new design point: map a range in each dimension one–to–one + draw a random value within it
+    [random.shuffle(i) for i in ranges_parameters] # shuffling once = drawing k times random
+    new_vectors=[]
+    for i in range(k):
+        new_vector = []
+        for j in range(len(parameters)):
+            rng = ranges_parameters[j][i]
+            if parameters[j][2]=="float":
+                new_vector += [random.uniform(rng[0], rng[1])]
+            if parameters[j][2]=="int":
+                new_vector += [random.randint(rng[0], rng[1])]
+        new_vectors += [new_vector]
+    return new_vectors
+
 
 if __name__ == "__main__":
 
     # Set Parameters you want to tune here. If you don't want them to be tuned, don't put them in the parameters list
     # Define a reasonable range for the values of the parameters.
-    parameters=[["elitist_size", [5,25], "int"],
-                ["proletarian_size", [10,30], "int"],
-                ["cluster_distance_thresh", [0.2,3], "float"],
-                ["offspring_size", [50,100], "int"],
-                ["parent_tournament_size",[2,50], "int"],
-                ["survivor_tournament_size",[2,50], "int"],
-                ["non_uniform_mutation_step_size", [0.05, 3], "float"],
-                ["hill_climb_step_size", [0.1, 2], "float"],
-                ["evaluations_per_proletarian", [40, 100], "int"]]
 
-    #params of the revac opimizer
-    population_size=100
-    parent_size=50
-    h=int(round(parent_size/10)) # mentioned in paper
-    runs_per_vector = 5 # Not too big 
+    ## PARAMS TO TUNE:
+    # (1) Simple approach
+    # On Katsuura:
+    """
+    parameters=[["offspring_percentage", [100,150], "float"],
+                ["parent_tournament_size", [4,50], "int"],
+                ["survivor_tournament_size", [2,50], "int"],
+                ["non_uniform_mutation_step_size", [0.05, 3], "float"],
+                ["population_size", [1000,1000], "int"]]
+    """
+    #  Else:
+    """
+    parameters=[["offspring_percentage", [100,150], "float"],
+                ["parent_tournament_size", [4,50], "int"],
+                ["survivor_tournament_size", [2,50], "int"],
+                ["non_uniform_mutation_step_size", [0.05, 3], "float"],
+                ["population_size", [100,100], "int"]]
+    """
+
+    # (2) Simple approach + Ours
+    # On Katsuura:
+    """
+    parameters=[["offspring_percentage", [100,150], "float"],
+                ["parent_tournament_size", [4,50], "int"],
+                ["survivor_tournament_size", [2,50], "int"],
+                ["non_uniform_mutation_step_size", [0.05, 3], "float"],
+                ["population_size", [1000,1000], "int"],
+                ["cluster_distance_thresh", [1.2,3], "float"],
+                ["hill_climb_step_size", [0.1, 1], "float"]]
+    """
+    # Else:
+    """
+    parameters=[["offspring_percentage", [100,150], "float"],
+                ["parent_tournament_size", [4,50], "int"],
+                ["survivor_tournament_size", [2,50], "int"],
+                ["non_uniform_mutation_step_size", [0.05, 3], "float"],
+                ["population_size", [100,100], "int"],
+                ["cluster_distance_thresh", [1.2,3], "float"],
+                ["hill_climb_step_size", [0.1, 1], "float"]]
+    """
+
+    # (3) Sophisticated Approach:
+    # On Katsuura
+    """
+    parameters=[["parent_tournament_size", [4,50], "int"],
+                ["population_size", [1000,1000], "int"]]
+    """
+    # Else
+    """
+    parameters=[["parent_tournament_size", [4,50], "int"],
+                ["population_size", [100,100], "int"]]
+    """
+
+    # (4) Sophisticated Approach + Ours:
+    # On Katsuura
+    """
+    parameters=[["parent_tournament_size", [4,50], "int"],
+                ["population_size", [1000,1000], "int"],
+                ["cluster_distance_thresh", [1.2,3], "float"],
+                ["hill_climb_step_size", [0.1, 1], "float"]]
+    """
+    # Else
+    """
+    parameters=[["parent_tournament_size", [4,50], "int"],
+                ["population_size", [100,100], "int"],
+                ["cluster_distance_thresh", [1.2,3], "float"],
+                ["hill_climb_step_size", [0.1, 1], "float"]]
+    """
+
+    parameters=[["parent_tournament_size", [4,50], "int"],
+                ["population_size", [1000,1000], "int"],
+                ["cluster_distance_thresh", [1.2,3], "float"],
+                ["hill_climb_step_size", [0.1, 1], "float"]]
+
+
+    ## REVAC PARAMS
+    ##### (1) USE THESE IF YOU'RE OPTIMIZING ON KATSUURA
+    population_size=75
+    parent_size=30
+    h=3 # about parent_size/10
+    runs_per_vector = 5
+    num_evaluations = 1000
+
+    ##### (2) USE THESE ELSE:
+    #population_size=100
+    #parent_size=50
+    #h=5 # about parent_size/10
+    #runs_per_vector = 20
+    #num_evaluations = 1000
+
 
     # tune parameters with revac
-    tune(parameters, population_size, parent_size, h,runs_per_vector)
+    tune(parameters, population_size, parent_size, h,runs_per_vector, num_evaluations)
