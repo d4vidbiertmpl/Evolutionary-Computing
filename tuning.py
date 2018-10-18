@@ -38,7 +38,7 @@ def log_vector(vector, response, evaluation=0, path="revac_output.txt"):
     with open(path, 'a') as f:
         f.write("["+str(evaluation)+"\t"+str(vector)+"\t"+str(response)+"] \n")
 
-def evaluate_parameters(parameter_vector, parameter_names, num_runs, ini=false):
+def evaluate_parameters(parameter_vector, parameter_names, num_runs, ini=False):
     """
     Evaluates parameter_vector by computings its average performance over num_runs runs.
     """
@@ -117,7 +117,7 @@ def tune(parameters, population_size=80, parent_size=35, h=5, runs_per_vector=1,
     #print("Initialized. Start Evaluation")
 
     # (2) Compute the utility of each parameter vector, before finding and recording the best parameter vector
-    utility_table = [evaluate_parameters(parameter_vector, parameter_names,runs_per_vector, ini=true) for parameter_vector in population]
+    utility_table = [evaluate_parameters(parameter_vector, parameter_names,runs_per_vector, ini=True) for parameter_vector in population]
 
     # log best parameters
     max_utility = max(utility_table)
