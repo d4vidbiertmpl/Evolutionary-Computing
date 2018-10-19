@@ -9,17 +9,17 @@ class Parameters {
     public static final double values_min = -5.0;
     public static final double values_max = 5.0;
     // number of individuals of one population
-    public static int population_size = 1000;
+    public static int population_size = 500;
 
 
     // Parameters for the clustering
     public int elitist_size = 10 * population_size / 100;
     public int proletarian_size = 15 * population_size / 100;
-    public double cluster_distance_thresh = 1.6097353905781224;
+    public double cluster_distance_thresh = 2.2690223010178983;
 
 
     // Parameters for the EA-components
-    public int offspring_size = 1340;
+    public int offspring_size = 650;
 
     // (1) Parameters for parent selection
 //    public int parent_tournament_size = 47;
@@ -39,15 +39,15 @@ class Parameters {
     // (4) Parameters for hybridisation
     public int evaluations_per_proletarian = 10;
     public boolean use_hybridisation = true; //If true, hybridisation will be used in the 'sophisticated approach with own' on multimodal functions only
-    public double hill_climb_step_size = 0.19520320686518625;
+    public double hill_climb_step_size = 0.9601293606479896;
 
     // sophisticated approach Bentcigar
-    public int parent_tournament_size = 40;
+    public int parent_tournament_size = 39;
 
     //Simple approach Bentcigar
 //    public int offspring_size=123;
-    public int survivor_tournament_size=16;
-    public double non_uniform_mutation_step_size=1.9916534678949145;
+    public int survivor_tournament_size=4;
+    public double non_uniform_mutation_step_size=0.15143002448265783;
 
 //Simple approach Schaffers
 // offspring_percentage=130.12368486099646
@@ -86,3 +86,12 @@ class Parameters {
 // survivor_tournament_size=16
 // non_uniform_mutation_step_size=1.9916534678949145
 
+
+// Schaffers simple approach clustering
+// offspring_percentage=111.30764393411431
+// parent_tournament_size=40
+// survivor_tournament_size=5
+// non_uniform_mutation_step_size=0.09650924903657412
+// population_size=500
+// cluster_distance_thresh=2.2690223010178983
+// hill_climb_step_size=0.9601293606479896

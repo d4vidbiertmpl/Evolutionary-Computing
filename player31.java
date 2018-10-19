@@ -338,6 +338,8 @@ public class player31 implements ContestSubmission {
 
       while (evaluations_counter_ < evaluations_limit_) {
 
+          printPopulationCSV(population);
+
           // Create offspring
           ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
           while (offspring.size() < parameters.offspring_size) {
