@@ -29,7 +29,7 @@ def build_command(parameter_values, parameter_names):
             command+="-D"+name+"="+str(value)+" "
     command += "-jar testrun.jar -submission=player31 -evaluation=KatsuuraEvaluation -seed="
     seed = random.randint(0,10000000)
-    return command+str(seed);
+    return command+str(seed)
 
 def log_vector(vector, response, evaluation=0, path="revac_output.txt"):
     """
@@ -174,7 +174,7 @@ def latin_hypercube_sampling(parameters, k=100):
             y += [[x[i], x[i+1]]]
         ranges_parameters += [y]
 
-    # For each new design point: map a range in each dimension one–to–one + draw a random value within it
+    # For each new design point: map a range in each dimension one-to-one + draw a random value within it
     [random.shuffle(i) for i in ranges_parameters] # shuffling once = drawing k times random
     new_vectors=[]
     for i in range(k):
@@ -205,17 +205,17 @@ if __name__ == "__main__":
                 ["population_size", [1000,1000], "int"]]
     """
     #  Else:
-    """
-    parameters=[["offspring_percentage", [100,150], "float"],
-                ["parent_tournament_size", [4,50], "int"],
-                ["survivor_tournament_size", [2,50], "int"],
-                ["non_uniform_mutation_step_size", [0.05, 3], "float"],
-                ["population_size", [100,100], "int"]]
-    """
+
+    # parameters=[["offspring_percentage", [100,150], "float"],
+    #             ["parent_tournament_size", [4,50], "int"],
+    #             ["survivor_tournament_size", [2,50], "int"],
+    #             ["non_uniform_mutation_step_size", [0.05, 3], "float"],
+    #             ["population_size", [500,500], "int"]]
+
 
     # (2) Simple approach + Ours
     # On Katsuura:
-    """
+
     parameters=[["offspring_percentage", [100,150], "float"],
                 ["parent_tournament_size", [4,50], "int"],
                 ["survivor_tournament_size", [2,50], "int"],
@@ -223,7 +223,7 @@ if __name__ == "__main__":
                 ["population_size", [1000,1000], "int"],
                 ["cluster_distance_thresh", [1.2,3], "float"],
                 ["hill_climb_step_size", [0.1, 1], "float"]]
-    """
+
     # Else:
     """
     parameters=[["offspring_percentage", [100,150], "float"],
@@ -263,11 +263,6 @@ if __name__ == "__main__":
                 ["hill_climb_step_size", [0.1, 1], "float"]]
     """
 
-    parameters=[["parent_tournament_size", [4,50], "int"],
-                ["population_size", [1000,1000], "int"],
-                ["cluster_distance_thresh", [1.2,3], "float"],
-                ["hill_climb_step_size", [0.1, 1], "float"]]
-
 
     ## REVAC PARAMS
     ##### (1) USE THESE IF YOU'RE OPTIMIZING ON KATSUURA
@@ -278,11 +273,11 @@ if __name__ == "__main__":
     num_evaluations = 1000
 
     ##### (2) USE THESE ELSE:
-    #population_size=100
-    #parent_size=50
-    #h=5 # about parent_size/10
-    #runs_per_vector = 20
-    #num_evaluations = 1000
+    # population_size=100
+    # parent_size=50
+    # h=5 # about parent_size/10
+    # runs_per_vector = 20
+    # num_evaluations = 1000
 
 
     # tune parameters with revac

@@ -115,10 +115,10 @@ public class player31 implements ContestSubmission {
     public void run() {
         // Which experiment do we want to execute?
 
-        // simple_approach();
-        // simple_approach_with_own();
-        sophisticated_approach();
-        //sophisticated_approach_with_own();
+        simple_approach();
+//         simple_approach_with_own();
+        // sophisticated_approach();
+//        sophisticated_approach_with_own();
     }
 
     private void evaluateIndividuals(ArrayList<Individual> individuals) {
@@ -290,6 +290,9 @@ public class player31 implements ContestSubmission {
         evaluateIndividuals(population);
 
         while (evaluations_counter_ < evaluations_limit_) {
+
+            printPopulationCSV(population);
+            //printMaxFitness(population);
 
             // Create offspring
             ArrayList<Individual> offspring = new ArrayList<Individual>(parameters.population_size);
