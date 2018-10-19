@@ -9,17 +9,17 @@ class Parameters {
     public static final double values_min = -5.0;
     public static final double values_max = 5.0;
     // number of individuals of one population
-    public static int population_size = 100;
+    public static int population_size = 1000;
 
 
     // Parameters for the clustering
     public int elitist_size = 10 * population_size / 100;
     public int proletarian_size = 15 * population_size / 100;
-    public double cluster_distance_thresh = 1.3007402405183437;
+    public double cluster_distance_thresh = 1.6097353905781224;
 
 
     // Parameters for the EA-components
-//    public int offspring_size = 100;
+    public int offspring_size = 1340;
 
     // (1) Parameters for parent selection
 //    public int parent_tournament_size = 47;
@@ -39,14 +39,15 @@ class Parameters {
     // (4) Parameters for hybridisation
     public int evaluations_per_proletarian = 10;
     public boolean use_hybridisation = true; //If true, hybridisation will be used in the 'sophisticated approach with own' on multimodal functions only
-    public double hill_climb_step_size = 0.6827029110776486;
+    public double hill_climb_step_size = 0.19520320686518625;
 
+    // sophisticated approach Bentcigar
+    public int parent_tournament_size = 40;
 
     //Simple approach Bentcigar
-    public int offspring_size=123;
-    public int parent_tournament_size=44;
-    public int survivor_tournament_size=29;
-    public double non_uniform_mutation_step_size=0.06941195875934386;
+//    public int offspring_size=123;
+    public int survivor_tournament_size=16;
+    public double non_uniform_mutation_step_size=1.9916534678949145;
 
 //Simple approach Schaffers
 // offspring_percentage=130.12368486099646
@@ -60,5 +61,28 @@ class Parameters {
 // survivor_tournament_size=16
 // non_uniform_mutation_step_size=1.9916534678949145
 
+
+//Simple approach Clustering bentcigar
+//    public int offspring_percentage= 123.9789487679547
+//    parent_tournament_size=10
+//    survivor_tournament_size=17
+//    non_uniform_mutation_step_size=0.06542202660344815
+//    population_size=100
+//    cluster_distance_thresh=1.3260420688384487
+//    hill_climb_step_size=0.18175913741175742
+
+
 }
+
+// Soph with clustering bentcigar
+// parent_tournament_size=44
+// cluster_distance_thresh=1.6097353905781224
+// hill_climb_step_size=0.19520320686518625
+
+
+//Katsuura Simple approach without clustering
+// offspring_percentage= 134.15988296420113
+// parent_tournament_size=40
+// survivor_tournament_size=16
+// non_uniform_mutation_step_size=1.9916534678949145
 

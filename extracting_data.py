@@ -8,7 +8,8 @@ import csv
 import pickle
 
 
-def extract_data(link):
+def extract_data(link, population_size):
+
     os.system(
         "jar cmf MainClass.txt submission.jar player31.class Parameters.class Individual.class EA_Utils.class Clustering_Utils.class")
     os.system("javac -cp contest.jar player31.java Parameters.java Individual.java EA_Utils.java Clustering_Utils.java")
@@ -25,15 +26,15 @@ def extract_data(link):
         seed = random.randint(0, 10000000)
 
         # decide on which function to evaluate
-        command = 'java -jar testrun.jar -submission=player31  -evaluation=BentCigarFunction -seed=' + str(seed)
+        # command = 'java -jar testrun.jar -submission=player31  -evaluation=BentCigarFunction -seed=' + str(seed)
         # command = 'java -jar testrun.jar -submission=player31  -evaluation=SchaffersEvaluation -seed=' + str(seed)
-        # command = 'java -jar testrun.jar -submission=player31  -evaluation=KatsuuraEvaluation -seed=' + str(seed)
+        command = 'java -jar testrun.jar -submission=player31  -evaluation=KatsuuraEvaluation -seed=' + str(seed)
 
         output = os.popen(command).readlines()
 
         populations = [list(group) for k, group in itertools.groupby(output, lambda x: x.strip() == "+") if not k][:-1]
 
-        numpy_populations = np.zeros((0, 100, 10), np.float64)
+        numpy_populations = np.zeros((0, population_size, 10), np.float64)
 
         for population in populations:
             numpy_population = np.zeros((0, 10), np.float64)
@@ -47,7 +48,7 @@ def extract_data(link):
 
                 numpy_population = np.append(numpy_population, numpy_individual, axis=0)
 
-            numpy_populations = np.append(numpy_populations, np.reshape(numpy_population, (1, 100, 10)), axis=0)
+            numpy_populations = np.append(numpy_populations, np.reshape(numpy_population, (1, population_size, 10)), axis=0)
 
         entire_runs.append(numpy_populations)
 
@@ -71,12 +72,14 @@ def load_data(link):
         data = pickle.load(f)
 
     print len(data)
-    print data[0].shape
+    print data[1].shape
 
 
 if __name__ == "__main__":
 
     # before running check where the data will be saved
-    link = 'saved_runs/NAME_OF_APPROACH_AND_FUNC.pkl'
-    extract_data(link)
+    # link = 'saved_runs/NAME_OF_APPROACH_AND_FUNC.pkl'
+    link = 'saved_runs/soph_with_own_bent.pkl'
+    extract_data(link, 1000)
     load_data(link)
+
