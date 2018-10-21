@@ -26,7 +26,7 @@ class Parameters {
 
     // (2) Parameters for mutation
     public double uniform_mutation_prop = 0.05;
-//    public double non_uniform_mutation_step_size = 0.3;
+    public double non_uniform_mutation_step_size = 0.3;
 
     // Parameters regarding the adaptive mutation
     public double tau = 1 / Math.sqrt(2 * individual_size);
@@ -47,7 +47,7 @@ class Parameters {
     //Simple approach Bentcigar
 //    public int offspring_size=123;
     public int survivor_tournament_size=4;
-    public double non_uniform_mutation_step_size=0.15143002448265783;
+    //    public double non_uniform_mutation_step_size=0.15143002448265783;
 
 //Simple approach Schaffers
 // offspring_percentage=130.12368486099646

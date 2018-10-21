@@ -114,11 +114,10 @@ public class player31 implements ContestSubmission {
 
     public void run() {
         // Which experiment do we want to execute?
-
-        simple_approach();
+	//        simple_approach();
 //         simple_approach_with_own();
         // sophisticated_approach();
-//        sophisticated_approach_with_own();
+        sophisticated_approach_with_own();
     }
 
     private void evaluateIndividuals(ArrayList<Individual> individuals) {
@@ -285,13 +284,38 @@ public class player31 implements ContestSubmission {
     // --------------------------------------------------------------------------
 
     private void simple_approach() {
+
+	
         // Initialize random population
         ArrayList<Individual> population = ea_utils.initialize_population(false);
         evaluateIndividuals(population);
 
+	//Set optimal parameters
+	if (evaluations_limit_ <= 20000) {
+	    //Bentcigar
+	    parameters.offspring_size = 123;
+	    parameters.parent_tournament_size = 44;
+	    parameters.survivor_tournament_size = 29;
+	    parameters.non_uniform_mutation_step_size = 0.06941195875934386;
+	}
+	else if (evaluations_limit_ > 20000 && evaluations_limit_ < 200000) {
+	    //Schaffers
+	    parameters.offspring_size = 651;
+	    parameters.parent_tournament_size = 39;
+	    parameters.survivor_tournament_size = 4;
+	    parameters.non_uniform_mutation_step_size = 0.15143002448265783;
+	}
+	else {
+	    //Katsuura
+	    parameters.offspring_size = 671;
+	    parameters.parent_tournament_size = 40;
+	    parameters.survivor_tournament_size = 16;
+	    parameters.non_uniform_mutation_step_size = 1.9916534678949145;
+	}
+
         while (evaluations_counter_ < evaluations_limit_) {
 
-            printPopulationCSV(population);
+	    printPopulationCSV(population);
             //printMaxFitness(population);
 
             // Create offspring
@@ -336,6 +360,35 @@ public class player31 implements ContestSubmission {
       ArrayList<Individual> population = ea_utils.initialize_population(false);
       evaluateIndividuals(population);
 
+      //Set optimal parameters
+      if (evaluations_limit_ < 20000) {
+	  //Bentcigar
+	  parameters.offspring_size = 124;
+	  parameters.parent_tournament_size = 10;
+	  parameters.survivor_tournament_size = 17;
+	  parameters.non_uniform_mutation_step_size = 0.06542202660344815;
+	  parameters.cluster_distance_thresh = 1.3260420688384487;
+	  parameters.hill_climb_step_size = 0.18175913741175742;
+	  
+      } else if (evaluations_limit_ > 20000 && evaluations_limit_ < 200000) {
+	  //Schaffers
+	  parameters.offspring_size = 557;
+	  parameters.parent_tournament_size = 40;
+	  parameters.survivor_tournament_size = 5;
+	  parameters.non_uniform_mutation_step_size = 0.09650924903657412;
+	  parameters.cluster_distance_thresh = 2.2690223010178983;
+	  parameters.hill_climb_step_size = 0.9601293606479896;
+      }
+      else {
+	  //Katsuura
+	  parameters.offspring_size = 1067;
+	  parameters.parent_tournament_size = 46;
+	  parameters.survivor_tournament_size = 40;
+	  parameters.non_uniform_mutation_step_size = 0.9135994816595264;
+	  parameters.cluster_distance_thresh = 2.020101195975144;
+	  parameters.hill_climb_step_size = 0.8291379130629197;
+      }
+	    
       while (evaluations_counter_ < evaluations_limit_) {
 
           printPopulationCSV(population);
@@ -406,6 +459,19 @@ public class player31 implements ContestSubmission {
         ArrayList<Individual> population = ea_utils.initialize_population(true);
         evaluateIndividuals(population);
 
+	//Set optimal parameters
+	if (evaluations_limit_ < 20000) {
+	    //Bentcigar
+	    parameters.parent_tournament_size = 47;
+	} else if (evaluations_limit_ > 20000 && evaluations_limit_ < 200000) {
+	    //Schaffers
+	    parameters.parent_tournament_size = 14;
+	}
+	else {
+	    //Katsuura
+	    parameters.parent_tournament_size = 24;
+	}
+
         while (evaluations_counter_ < evaluations_limit_) {
 
             //printPopulationCSV(population);
@@ -444,6 +510,25 @@ public class player31 implements ContestSubmission {
         ArrayList<Individual> population = ea_utils.initialize_population(true);
         evaluateIndividuals(population);
 
+	//Set optimal parameters
+	if (evaluations_limit_ < 20000) {
+	    //Bentcigar
+	    parameters.parent_tournament_size = 44;
+	    parameters.cluster_distance_thresh = 1.6097353905781224;
+	    parameters.hill_climb_step_size = 0.19520320686518625;
+	} else if (evaluations_limit_ > 20000 && evaluations_limit_ < 200000) {
+	    //Schaffers
+	    parameters.parent_tournament_size = 26;
+	    parameters.cluster_distance_thresh = 1.7415716365337883;
+	    parameters.hill_climb_step_size = 0.1926312317699083;
+	}
+	else {
+	    //Katsuura
+	    parameters.parent_tournament_size = 459;
+	    parameters.cluster_distance_thresh = 1.0419373529859326;
+	    parameters.hill_climb_step_size = 2.8637493258869408;
+	}
+		    
         while (evaluations_counter_ < evaluations_limit_) {
 
             // Create Offspring from population
